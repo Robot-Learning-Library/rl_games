@@ -206,14 +206,17 @@ class A2CBase(BaseAlgorithm):
 
         # a folder inside of train_dir containing everything related to a particular experiment
         self.experiment_dir = os.path.join(self.train_dir, self.experiment_name)
+        self.experiment_time  = datetime.now().strftime("%Y%m%d%H%M%S")
 
         # folders inside <train_dir>/<experiment_dir> for a specific purpose
         self.nn_dir = os.path.join(self.experiment_dir, 'nn')
+        self.experiment_run_dir = os.path.join(self.nn_dir, self.experiment_time)
         self.summaries_dir = os.path.join(self.experiment_dir, 'summaries')
 
         os.makedirs(self.train_dir, exist_ok=True)
         os.makedirs(self.experiment_dir, exist_ok=True)
         os.makedirs(self.nn_dir, exist_ok=True)
+        os.makedirs(self.experiment_run_dir, exist_ok=True)
         os.makedirs(self.summaries_dir, exist_ok=True)
 
         self.entropy_coef = self.config['entropy_coef']
@@ -961,17 +964,20 @@ class DiscreteA2CBase(A2CBase):
 
                     if self.save_freq > 0:
                         if (epoch_num % self.save_freq == 0) and (mean_rewards <= self.last_mean_rewards):
-                            self.save(os.path.join(self.nn_dir, 'last_' + checkpoint_name))
+                            # self.save(os.path.join(self.nn_dir, 'last_' + checkpoint_name))
+                            self.save(os.path.join(self.experiment_run_dir, checkpoint_name))
 
                     if mean_rewards[0] > self.last_mean_rewards and epoch_num >= self.save_best_after:
                         print('saving next best rewards: ', mean_rewards)
                         self.last_mean_rewards = mean_rewards[0]
-                        self.save(os.path.join(self.nn_dir, self.config['name']))
+                        # self.save(os.path.join(self.nn_dir, self.config['name']))
+                        self.save(os.path.join(self.experiment_run_dir, self.config['name']))
 
                         if 'score_to_win' in self.config:
                             if self.last_mean_rewards > self.config['score_to_win']:
                                 print('Network won!')
-                                self.save(os.path.join(self.nn_dir, checkpoint_name))
+                                # self.save(os.path.join(self.nn_dir, checkpoint_name))
+                                self.save(os.path.join(self.experiment_run_dir, checkpoint_name))
                                 should_exit = True
 
                 if epoch_num >= self.max_epochs:
@@ -979,8 +985,11 @@ class DiscreteA2CBase(A2CBase):
                         print('WARNING: Max epochs reached before any env terminated at least once')
                         mean_rewards = -np.inf
 
-                    self.save(os.path.join(self.nn_dir,
-                                               'last_' + self.config['name'] + 'ep' + str(epoch_num) + 'rew' + str(
+                    # self.save(os.path.join(self.nn_dir,
+                    #                            'last_' + self.config['name'] + 'ep' + str(epoch_num) + 'rew' + str(
+                    #                                mean_rewards)))
+                    self.save(os.path.join(self.experiment_run_dir,
+                                               self.config['name'] + 'ep' + str(epoch_num) + 'rew' + str(
                                                    mean_rewards)))
                     print('MAX EPOCHS NUM!')
                     should_exit = True
@@ -1222,24 +1231,28 @@ class ContinuousA2CBase(A2CBase):
 
                     if self.save_freq > 0:
                         if (epoch_num % self.save_freq == 0) and (mean_rewards[0] <= self.last_mean_rewards):
-                            self.save(os.path.join(self.nn_dir, 'last_' + checkpoint_name))
+                            # self.save(os.path.join(self.nn_dir, 'last_' + checkpoint_name))
+                            self.save(os.path.join(self.experiment_run_dir, checkpoint_name))
 
                     if mean_rewards[0] > self.last_mean_rewards and epoch_num >= self.save_best_after:
                         print('saving next best rewards: ', mean_rewards)
                         self.last_mean_rewards = mean_rewards[0]
-                        self.save(os.path.join(self.nn_dir, self.config['name']))
+                        # self.save(os.path.join(self.nn_dir, self.config['name']))
+                        self.save(os.path.join(self.experiment_run_dir, self.config['name']))
 
                         if 'score_to_win' in self.config:
                             if self.last_mean_rewards > self.config['score_to_win']:
                                 print('Network won!')
-                                self.save(os.path.join(self.nn_dir, checkpoint_name))
+                                # self.save(os.path.join(self.nn_dir, checkpoint_name))
+                                self.save(os.path.join(self.experiment_run_dir, checkpoint_name))
                                 should_exit = True
 
                 if epoch_num >= self.max_epochs:
                     if self.game_rewards.current_size == 0:
                         print('WARNING: Max epochs reached before any env terminated at least once')
                         mean_rewards = -np.inf
-                    self.save(os.path.join(self.nn_dir, 'last_' + self.config['name'] + 'ep' + str(epoch_num) + 'rew' + str(mean_rewards)))
+                    # self.save(os.path.join(self.nn_dir, 'last_' + self.config['name'] + 'ep' + str(epoch_num) + 'rew' + str(mean_rewards)))
+                    self.save(os.path.join(self.experiment_run_dir, self.config['name'] + 'ep' + str(epoch_num) + 'rew' + str(mean_rewards)))
                     print('MAX EPOCHS NUM!')
                     should_exit = True
 
